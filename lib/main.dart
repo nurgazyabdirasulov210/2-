@@ -20,6 +20,7 @@ class _TravelScreenState extends State<TravelScreen> with SingleTickerProviderSt
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
   }
+  List<String> categories = ['Пляжи', 'Горы', 'Леса', 'Музеи', 'Парки', 'Отели'];
 
   @override
   Widget build(BuildContext context) {
@@ -62,15 +63,17 @@ class _TravelScreenState extends State<TravelScreen> with SingleTickerProviderSt
                 .toList(),
             onChanged: (val) => setState(() => selectedCountry = val!),
           ),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: List.generate(6, (index) => Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Chip(label: Text("Категория $index")),
-              )),
-            ),
-          ),
+SingleChildScrollView(
+  scrollDirection: Axis.horizontal,
+  child: Row(
+    children: categories.map((cat) => Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Chip(label: Text(cat)),
+    )).toList(),
+  ),
+),
+          
+          
           Expanded(
             child: ListView.builder(
               itemCount: 6,
@@ -105,10 +108,8 @@ class _TravelScreenState extends State<TravelScreen> with SingleTickerProviderSt
                 );
               },
             ),
-          ),
-        ],
-      ),
-    );
+          ),])
+        );
   }
 }
 
