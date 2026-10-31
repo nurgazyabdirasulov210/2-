@@ -11,7 +11,7 @@ async function ensureFonts(px: number): Promise<void> {
     if (!fonts) return
     await Promise.race([
       Promise.all([
-        fonts.load(`${px}px "Instrument Serif"`),
+        fonts.load(`${px}px "Cormorant Garamond"`),
         fonts.load(`${Math.round(px / 2.6)}px "JetBrains Mono"`),
       ]),
       new Promise((r) => setTimeout(r, 1500)),
@@ -83,7 +83,7 @@ export async function exportFramePNG(
   const maxW = iw * 0.72
   ctx.fillStyle = ink
   ctx.textBaseline = 'alphabetic'
-  ctx.font = `${titlePx}px "Instrument Serif", "Iowan Old Style", Georgia, serif`
+  ctx.font = `${titlePx}px "Cormorant Garamond", "Iowan Old Style", Georgia, serif`
   const title = caption.title?.trim() || FILM_IMPLS[params.film]?.meta.name || ''
   ctx.fillText(fitText(ctx, title, maxW), tx, m + ih + bottom * 0.46)
   const monoPx = Math.round(iw * 0.017)
