@@ -98,14 +98,21 @@ function draw(s: Scene): void {
   const refl = (X: number, Y: number, Z: number, c: RGB, a: number, wid: number) => {
     const [x, y0] = P(X, 0, Z)
     const [, ym] = P(X, -Y, Z)
-    const len = (ym - y0) * 2.2 + 0.02
+    const len = (ym - y0) * 1.7 + 0.015
     const g = r.createLinearGradient(0, y0, 0, y0 + len)
     g.addColorStop(0, css(c, a * 0.9))
     g.addColorStop(0.35, css(c, a * 0.5))
     g.addColorStop(1, css(c, 0))
     r.fillStyle = g
     const w = Math.max(wid, 0.002)
-    r.fillRect(x - w / 2, y0, w, len)
+    // broken into ripples
+    const steps = Math.max(4, Math.round(len / 0.004))
+    for (let i = 0; i < steps; i++) {
+      const yy = y0 + (i / steps) * len
+      const jit = (fbm(noise, x * 40 + i * 0.7, yy * 90, 2)) * w * 0.9
+      const ww = w * (0.55 + 0.6 * (fbm(noise, yy * 120, x * 30, 2) * 0.5 + 0.5))
+      r.fillRect(x - ww / 2 + jit, yy, ww, (len / steps) * 0.8)
+    }
   }
 
   // ---- buildings
@@ -150,7 +157,7 @@ function draw(s: Scene): void {
         }
       }
       // ground-floor shopfront
-      if (rng.chance(0.55) && sg.z0 < 150) {
+      if (rng.chance(0.55) && sg.z0 < 150 && sg.z0 > 7) {
         const z0 = sg.z0 + rng.range(0.5, 2)
         const z1 = Math.min(sg.z1 - 0.5, z0 + rng.range(4, 9))
         const sc = rng.pick([[255, 214, 150], [230, 240, 255], [255, 190, 120]] as RGB[])
@@ -306,7 +313,7 @@ function draw(s: Scene): void {
   const mask = fieldSurface(Math.round(pw / 4), Math.round((pw / 4) * H), H, (u, v, o) => {
     if (v < cam.hy) { o[3] = 0; return }
     const d = (v - cam.hy) + 0.02
-    const n = fbm(noise, u * 3 / d * 0.12 + 40, v * 9 / d * 0.12, 4) * 0.5 + 0.5
+    const n = fbm(noise, (u * 0.6) / d * 0.12 + 40, (v * 14) / d * 0.12, 4) * 0.5 + 0.5
     o[0] = o[1] = o[2] = 1
     o[3] = clamp(0.35 + wet * 0.5 + (n - 0.5) * 1.6, 0.15, 1)
   })
@@ -316,7 +323,7 @@ function draw(s: Scene): void {
   ctx.setTransform(1, 0, 0, 1, 0, 0)
   ctx.globalCompositeOperation = 'screen'
   ctx.drawImage(rb.canvas, 0, 0)
-  ctx.globalAlpha = 0.7
+  ctx.globalAlpha = 0.35
   ctx.drawImage(R.canvas, 0, 0)
   ctx.restore()
   glow.save()
@@ -366,8 +373,8 @@ export const cinestill: FilmImpl = {
     }),
   bloom: () => [
     { radius: 0.006, strength: 0.6, tint: [255, 230, 210] },
-    { radius: 0.022, strength: 1.4, tint: [255, 46, 24] },
-    { radius: 0.07, strength: 0.7, tint: [255, 70, 40] },
+    { radius: 0.02, strength: 1.5, tint: [255, 50, 26], mono: true },
+    { radius: 0.07, strength: 0.8, tint: [255, 70, 40], mono: true },
   ],
   precipTone: [255, 220, 200],
 }

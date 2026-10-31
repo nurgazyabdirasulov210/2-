@@ -47,6 +47,8 @@ export interface BloomPass {
   radius: number
   strength: number
   tint: RGB
+  /** use the light's brightness only (halation is red whatever the light colour) */
+  mono?: boolean
 }
 
 export interface FilmImpl {

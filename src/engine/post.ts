@@ -10,6 +10,11 @@ export function applyBloom(main: Surface, glow: Surface, passes: BloomPass[]): v
   for (const p of passes) {
     if (p.strength <= 0) continue
     const b = blurSurface(glow, p.radius * main.w)
+    if (p.mono) {
+      b.ctx.globalCompositeOperation = 'saturation'
+      b.ctx.fillStyle = '#808080'
+      b.ctx.fillRect(0, 0, b.w, b.h)
+    }
     b.ctx.globalCompositeOperation = 'multiply'
     b.ctx.fillStyle = css(p.tint)
     b.ctx.fillRect(0, 0, b.w, b.h)
