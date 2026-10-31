@@ -8,32 +8,10 @@ import { PrintTicket } from '../components/album/PrintTicket'
 import { edgeNumber, frameParams, getFilm } from '../components/album/films'
 import { FrameCanvas } from '../components/FrameCanvas'
 import { Button } from '../components/ui/Button'
-import { exportFramePNG } from '../engine'
+import { downloadPrint, prewarmPrint, sharePrint } from '../lib/print'
 import { getDemoFrames, isDemoId } from '../lib/demo'
-import { formatDate } from '../lib/format'
 import { useStudio } from '../store'
 import type { Frame } from '../types'
-
-async function makePNG(frame: Frame): Promise<Blob> {
-  const film = getFilm(frame.film)
-  return exportFramePNG(frameParams(frame), {
-    title: frame.intention || `Кадр № ${frame.number}`,
-    subtitle: `${film.name} · ${formatDate(frame.startedAt)} · Проявка`,
-  })
-}
-
-const fileName = (f: Frame) => `proyavka-kadr-${String(f.number).padStart(3, '0')}.png`
-
-function downloadBlob(blob: Blob, name: string) {
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = name
-  document.body.appendChild(a)
-  a.click()
-  a.remove()
-  setTimeout(() => URL.revokeObjectURL(url), 2000)
-}
 
 export default function FrameDetail() {
   const { id } = useParams()
@@ -52,14 +30,14 @@ export default function FrameDetail() {
   const next = index >= 0 && index < frames.length - 1 ? frames[index + 1] : null
   const q = demo ? '?demo=1' : ''
 
-  const [status, setStatus] = useState<string>('')
   const [busy, setBusy] = useState<'download' | 'share' | null>(null)
-  const [confirmDelete, setConfirmDelete] = useState(false)
-
-  useEffect(() => {
-    setConfirmDelete(false)
-    setStatus('')
-  }, [id])
+  // per-frame UI state: keyed by id so it resets when navigating between frames
+  const [statusFor, setStatusFor] = useState<{ id?: string; text: string }>({ text: '' })
+  const [confirmDeleteFor, setConfirmDeleteFor] = useState<string | null>(null)
+  const status = statusFor.id === id ? statusFor.text : ''
+  const setStatus = (text: string) => setStatusFor({ id, text })
+  const confirmDelete = confirmDeleteFor != null && confirmDeleteFor === id
+  const setConfirmDelete = (v: boolean) => setConfirmDeleteFor(v ? (id ?? null) : null)
 
   const go = useCallback((f: Frame | null) => f && navigate(`/album/${f.id}${q}`, { replace: true }), [navigate, q])
 
@@ -94,7 +72,7 @@ export default function FrameDetail() {
   const onDownload = async () => {
     setBusy('download')
     try {
-      downloadBlob(await makePNG(frame), fileName(frame))
+      await downloadPrint(frame)
       setStatus('Отпечаток сохранён в загрузки.')
     } catch {
       setStatus('Не удалось подготовить PNG. Попробуйте ещё раз.')
@@ -106,22 +84,10 @@ export default function FrameDetail() {
   const onShare = async () => {
     setBusy('share')
     try {
-      const blob = await makePNG(frame)
-      const file = new File([blob], fileName(frame), { type: 'image/png' })
-      const data: ShareData = {
-        files: [file],
-        title: `Проявка · кадр № ${frame.number}`,
-        text: frame.intention ? `«${frame.intention}» — проявлено без экрана.` : 'Проявлено без экрана.',
-      }
-      if (navigator.canShare?.(data) && navigator.share) {
-        await navigator.share(data)
-        setStatus('')
-      } else {
-        downloadBlob(blob, fileName(frame))
-        setStatus('Поделиться напрямую нельзя в этом браузере — отпечаток скачан.')
-      }
-    } catch (e) {
-      if ((e as DOMException)?.name !== 'AbortError') setStatus('Не удалось поделиться кадром.')
+      const outcome = await sharePrint(frame)
+      setStatus(outcome === 'downloaded' ? 'Поделиться напрямую нельзя в этом браузере — отпечаток скачан.' : '')
+    } catch {
+      setStatus('Не удалось поделиться кадром.')
     } finally {
       setBusy(null)
     }
@@ -216,7 +182,7 @@ export default function FrameDetail() {
               <Button variant="ghost" onClick={onDownload} disabled={busy !== null}>
                 <Download className="size-4" aria-hidden /> {busy === 'download' ? 'Печатаем…' : 'PNG'}
               </Button>
-              <Button variant="ghost" onClick={onShare} disabled={busy !== null}>
+              <Button variant="ghost" onClick={onShare} onPointerEnter={() => prewarmPrint(frame)} onFocus={() => prewarmPrint(frame)} disabled={busy !== null}>
                 <Share2 className="size-4" aria-hidden /> Поделиться
               </Button>
               {!demo && (

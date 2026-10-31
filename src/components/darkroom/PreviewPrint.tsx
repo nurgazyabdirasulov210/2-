@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { Shuffle } from 'lucide-react'
 import { FrameCanvas } from '../FrameCanvas'
@@ -23,9 +23,10 @@ export function PreviewPrint({
 }) {
   const reduce = useReducedMotion()
   const f = filmOf(film)
+  const [hour] = useState(() => new Date().getHours())
   const params = useMemo<FrameParams>(
-    () => ({ seed, film, weather, hour: new Date().getHours(), peeks: 0, fogged: false }),
-    [seed, film, weather],
+    () => ({ seed, film, weather, hour, peeks: 0, fogged: false }),
+    [seed, film, weather, hour],
   )
 
   return (

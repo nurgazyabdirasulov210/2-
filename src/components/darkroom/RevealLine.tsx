@@ -1,28 +1,25 @@
-import { useEffect, useMemo, useState } from 'react'
+import { createElement, useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { motion, useReducedMotion } from 'framer-motion'
 import { Download, LayoutGrid, Plus, Share2 } from 'lucide-react'
-import { exportFramePNG } from '../../engine'
 import { useStudio } from '../../store'
 import { formatDate, formatDuration, formatTime, pluralRu } from '../../lib/format'
 import { Button } from '../ui/Button'
-import { toast } from '../ui/Toast'
+import { toast } from '../ui/toastStore'
 import { FrameCanvas } from '../FrameCanvas'
 import type { Frame } from '../../types'
 import { Clothespin } from './Clothespin'
 import { LeakMarkers } from './LeakMarkers'
-import { weatherIcon } from './WeatherChip'
-import { downloadBlob, filmOf, frameParams, signedTemp } from './util'
+import { weatherIcon } from './weatherIcon'
+import { filmOf, frameParams, signedTemp } from './util'
+import { downloadPrint, prewarmPrint, printFileName, sharePrint } from '../../lib/print'
 
 /** Animate development from `from` to 1 — the last phase of the print "coming up" in front of you. */
 function useRevealProgress(from: number, durationMs: number, delayMs: number, instant: boolean) {
-  const [p, setP] = useState(instant ? 1 : from)
+  const [p, setP] = useState(from)
   useEffect(() => {
-    if (instant) {
-      setP(1)
-      return
-    }
+    if (instant) return
     let raf = 0
     let last = 0
     const t0 = performance.now() + delayMs
@@ -39,15 +36,7 @@ function useRevealProgress(from: number, durationMs: number, delayMs: number, in
     raf = requestAnimationFrame(step)
     return () => cancelAnimationFrame(raf)
   }, [from, durationMs, delayMs, instant])
-  return p
-}
-
-function captionFor(frame: Frame) {
-  const film = filmOf(frame.film)
-  const title = `Кадр №${frame.number}${frame.intention ? ` — ${frame.intention}` : ''}`
-  const parts = [film.name, formatDuration(frame.fogged ? frame.developedMs : frame.durationMs), formatDate(frame.finishedAt)]
-  if (frame.weather) parts.push(`${frame.weather.label}, ${signedTemp(frame.weather.temperature)}`)
-  return { title, subtitle: parts.join(' · ') }
+  return instant ? 1 : p
 }
 
 /** Phase 4 — the reveal ritual: the print hangs on a line with a wooden clothespin, swinging and dripping. */
@@ -61,17 +50,11 @@ export function RevealLine({ frame }: { frame: Frame }) {
   const [busy, setBusy] = useState<'save' | 'share' | null>(null)
   const ease = [0.22, 1, 0.36, 1] as const
 
-  const makeBlob = () => {
-    const c = captionFor(frame)
-    return exportFramePNG(params, c, 2000)
-  }
-  const filename = `proyavka-kadr-${frame.number}.png`
-
   const save = async () => {
     setBusy('save')
     try {
-      downloadBlob(await makeBlob(), filename)
-      toast('Отпечаток сохранён', { tone: 'success', description: filename })
+      const name = await downloadPrint(frame)
+      toast('Отпечаток сохранён', { tone: 'success', description: name })
     } catch {
       toast('Не удалось сохранить PNG', { tone: 'danger' })
     } finally {
@@ -82,28 +65,16 @@ export function RevealLine({ frame }: { frame: Frame }) {
   const share = async () => {
     setBusy('share')
     try {
-      const blob = await makeBlob()
-      const file = new File([blob], filename, { type: 'image/png' })
-      const data: ShareData = {
-        files: [file],
-        title: `Проявка — кадр №${frame.number}`,
-        text: frame.intention ? `«${frame.intention}» — ${formatDuration(frame.developedMs)} без экрана.` : `${formatDuration(frame.developedMs)} без экрана.`,
-      }
-      if (navigator.canShare?.(data) && navigator.share) {
-        await navigator.share(data)
-      } else {
-        downloadBlob(blob, filename)
-        toast('Поделиться напрямую нельзя — сохранил PNG', { description: filename })
-      }
-    } catch (e) {
-      if ((e as DOMException)?.name !== 'AbortError') toast('Не получилось поделиться', { tone: 'danger' })
+      const outcome = await sharePrint(frame)
+      if (outcome === 'downloaded') toast('Поделиться напрямую нельзя — сохранил PNG', { description: printFileName(frame) })
+    } catch {
+      toast('Не получилось поделиться', { tone: 'danger' })
     } finally {
       setBusy(null)
     }
   }
 
   const W = frame.weather
-  const WIcon = W ? weatherIcon(W) : null
 
   return (
     <motion.div
@@ -260,9 +231,9 @@ export function RevealLine({ frame }: { frame: Frame }) {
             <div>
               <dt className="text-overline uppercase text-text-3">{W ? 'Погода' : 'Когда'}</dt>
               <dd className="mt-1 flex items-center gap-2 text-body-sm text-text-1">
-                {W && WIcon ? (
+                {W ? (
                   <>
-                    <WIcon className="h-4 w-4 shrink-0 text-text-2" aria-hidden />
+                    {createElement(weatherIcon(W), { className: 'h-4 w-4 shrink-0 text-text-2', 'aria-hidden': true })}
                     <span>
                       {W.label}, <span className="whitespace-nowrap font-mono tabular">{signedTemp(W.temperature)}</span>
                     </span>
@@ -281,7 +252,7 @@ export function RevealLine({ frame }: { frame: Frame }) {
               <Download className="h-5 w-5" aria-hidden />
               {busy === 'save' ? 'Печатаю…' : 'Сохранить PNG'}
             </Button>
-            <Button variant="ghost" size="lg" onClick={share} disabled={busy !== null}>
+            <Button variant="ghost" size="lg" onClick={share} onPointerEnter={() => prewarmPrint(frame)} onFocus={() => prewarmPrint(frame)} disabled={busy !== null}>
               <Share2 className="h-5 w-5" aria-hidden />
               {busy === 'share' ? 'Готовлю…' : 'Поделиться'}
             </Button>

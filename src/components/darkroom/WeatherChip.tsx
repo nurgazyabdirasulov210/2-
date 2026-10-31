@@ -1,25 +1,10 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Cloud, CloudDrizzle, CloudFog, CloudLightning, CloudRain, Moon, Snowflake, Sun, type LucideIcon } from 'lucide-react'
-import { getCurrentWeather, weatherKind, type WeatherKind } from '../../lib/weather'
+import { Cloud } from 'lucide-react'
+import { getCurrentWeather } from '../../lib/weather'
+import { weatherIcon } from './weatherIcon'
 import type { Weather } from '../../types'
 import { signedTemp } from './util'
-
-const ICONS: Record<WeatherKind, LucideIcon> = {
-  clear: Sun,
-  cloudy: Cloud,
-  fog: CloudFog,
-  drizzle: CloudDrizzle,
-  rain: CloudRain,
-  snow: Snowflake,
-  storm: CloudLightning,
-}
-
-export function weatherIcon(w: Weather): LucideIcon {
-  const kind = weatherKind(w.weatherCode)
-  if (kind === 'clear' && !w.isDay) return Moon
-  return ICONS[kind]
-}
 
 /** Fetches current weather (only mounted when the setting is on) and reports it upward for the preview. */
 export function WeatherChip({ onWeather }: { onWeather?: (w: Weather | null) => void }) {

@@ -13,7 +13,7 @@ export interface StudioState {
   startSession(opts: { film: FilmId; durationMs: number; intention: string }): Promise<void> // fetches weather if enabled (non-blocking, timeout 4s)
   /** Called by visibility watcher when user returns to tab before completion. */
   openDoor(): void
-  /** User leaves again / presses "close the door" within grace => resume developing. peeks++ */
+  /** User leaves again / presses "close the door" => resume developing. peeks++ only if the door was open longer than settings.graceSeconds. */
   closeDoor(): void
   /** User gives up: saves a fogged frame and ends the session. */
   abortSession(): Frame | null

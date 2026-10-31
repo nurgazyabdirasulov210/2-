@@ -1,18 +1,10 @@
 // Small helpers shared by darkroom components.
 import { useEffect, useRef, useState } from 'react'
-import { FILMS, FILM_LIST } from '../../engine'
+import { FILMS } from '../../engine'
 import type { Film, FilmId, Frame, FrameParams } from '../../types'
 
-const FALLBACK_FILM = (id: FilmId): Film => ({
-  id,
-  name: id,
-  short: id.toUpperCase(),
-  description: '',
-  swatch: ['#EFE9DF', '#A9ABB8', '#1B1A17'],
-})
-
 export function filmOf(id: FilmId): Film {
-  return FILMS[id] ?? FILM_LIST.find((f) => f.id === id) ?? FALLBACK_FILM(id)
+  return FILMS[id]
 }
 
 export function randomSeed(): number {
@@ -34,16 +26,16 @@ export function useIdle(ms: number, enabled = true): boolean {
   const [idle, setIdle] = useState(false)
   const timer = useRef<number | undefined>(undefined)
   useEffect(() => {
-    if (!enabled) {
-      setIdle(false)
-      return
-    }
-    const arm = () => {
+    if (!enabled) return
+    const schedule = () => {
       window.clearTimeout(timer.current)
-      setIdle(false)
       timer.current = window.setTimeout(() => setIdle(true), ms)
     }
-    arm()
+    const arm = () => {
+      setIdle(false)
+      schedule()
+    }
+    schedule()
     const evs = ['pointermove', 'pointerdown', 'keydown', 'wheel', 'touchstart'] as const
     evs.forEach((e) => window.addEventListener(e, arm, { passive: true }))
     return () => {
@@ -51,18 +43,7 @@ export function useIdle(ms: number, enabled = true): boolean {
       evs.forEach((e) => window.removeEventListener(e, arm))
     }
   }, [ms, enabled])
-  return idle
-}
-
-export function downloadBlob(blob: Blob, filename: string) {
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = filename
-  document.body.appendChild(a)
-  a.click()
-  a.remove()
-  setTimeout(() => URL.revokeObjectURL(url), 4000)
+  return enabled && idle
 }
 
 export function signedTemp(t: number): string {

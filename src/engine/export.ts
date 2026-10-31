@@ -67,7 +67,8 @@ export async function exportFramePNG(
   for (let y = 0; y < H; y++) {
     for (let x = 0; x < W; x++) {
       const k = (y * W + x) * 4
-      const n = (hash2(x, y, 913) - 0.5) * 6 + (hash2(x >> 3, y, 77) - 0.5) * 3
+      // coarse fibre streaks only — per-pixel noise on the border made the PNG incompressible (+~3 MB)
+      const n = (hash2(x >> 3, y >> 1, 77) - 0.5) * 4
       d[k] += n; d[k + 1] += n; d[k + 2] += n * 0.9
     }
   }

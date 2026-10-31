@@ -268,11 +268,15 @@ export const useStudio = create<StudioState>()(
       },
 
       closeDoor() {
-        const { session, phase } = get()
+        const { session, phase, settings } = get()
         if (!session || phase !== 'door-open') return
+        const now = Date.now()
+        // Grace: a door closed again within settings.graceSeconds leaves no light leak.
+        const openFor = session.doorOpenedAt != null ? now - session.doorOpenedAt : Infinity
+        const leaked = openFor > settings.graceSeconds * 1000
         set({
           phase: 'developing',
-          session: { ...session, peeks: session.peeks + 1, stretchStartedAt: Date.now(), doorOpenedAt: null },
+          session: { ...session, peeks: session.peeks + (leaked ? 1 : 0), stretchStartedAt: now, doorOpenedAt: null },
         })
       },
 

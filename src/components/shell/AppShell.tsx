@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { Link, NavLink, useLocation, useOutlet } from 'react-router-dom'
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from 'framer-motion'
 import { Aperture, BookOpen, LayoutGrid, Settings2, type LucideIcon } from 'lucide-react'
@@ -123,7 +123,9 @@ export default function AppShell() {
             animate={{ opacity: 1, y: 0, transition: { duration: reduce ? 0.12 : 0.4, ease: [0.2, 0, 0, 1] } }}
             exit={reduce ? { opacity: 0, transition: { duration: 0.09 } } : { opacity: 0, y: -8, transition: { duration: 0.16, ease: [0.55, 0, 1, 0.45] } }}
           >
-            <FrozenOutlet />
+            <Suspense fallback={<div aria-busy="true" className="min-h-[60dvh]" />}>
+              <FrozenOutlet />
+            </Suspense>
           </motion.div>
         </AnimatePresence>
       </main>

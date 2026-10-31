@@ -3,9 +3,12 @@
 // Rules (phase → trigger → action):
 //  developing  · tab becomes visible            → openDoor()        (unless already complete → completeSession())
 //  developing  · interaction while visible       → openDoor()        (ignored for SETTLE_MS after lights go off)
-//  door-open   · tab hidden again                → closeDoor()       (peeks++ , development resumes)
+//  door-open   · tab hidden again                → closeDoor()       (development resumes; peeks++ only if the
+//                                                                     door stayed open longer than graceSeconds)
 //  door-open   · visible but idle for IDLE_MS    → closeDoor()       (user put the phone down without locking it)
 //  door-open   · grace elapsed                   → nothing (door-open just pauses development; no auto-abort)
+//  Interactions inside elements marked [data-no-peek] (abort button, confirm dialog) never open the door.
+//  `pageshow` only matters for back/forward-cache restores; a normal (re)load is handled once at mount.
 //  any session · developedAt >= durationMs       → completeSession() (+ notification if tab hidden & enabled)
 // Checked on visibilitychange, focus, pageshow, and a 1 s interval.
 import { useEffect, useState } from 'react'
@@ -84,9 +87,14 @@ function onVisibilityChange() {
   updateTitle(now)
 }
 
-function onActivity() {
+function isNoPeekTarget(target: EventTarget | null): boolean {
+  return target instanceof Element && target.closest('[data-no-peek]') != null
+}
+
+function onActivity(e?: Event) {
   const now = Date.now()
   lastActivityAt = now
+  if (e && isNoPeekTarget(e.target)) return
   if (!isVisible() || now < settleUntil) return
   const st = useStudio.getState()
   if (st.phase === 'developing' && st.session) {
@@ -96,6 +104,11 @@ function onActivity() {
 
 function onPointerMove(e: PointerEvent) {
   const now = Date.now()
+  if (isNoPeekTarget(e.target)) {
+    lastActivityAt = now
+    moveAccum = 0
+    return
+  }
   if (now - lastMoveAt > 600) moveAccum = 0
   else moveAccum += Math.hypot(e.clientX - lastMoveX, e.clientY - lastMoveY)
   lastMoveAt = now
@@ -103,15 +116,20 @@ function onPointerMove(e: PointerEvent) {
   lastMoveY = e.clientY
   if (moveAccum >= MOVE_THRESHOLD_PX) {
     moveAccum = 0
-    onActivity()
+    onActivity(e)
   }
+}
+
+function onPageShow(e: PageTransitionEvent) {
+  // Initial load / reload is evaluated once in install(); only bfcache restores need a re-check here.
+  if (e.persisted) onVisibilityChange()
 }
 
 function install(): () => void {
   const opts: AddEventListenerOptions = { passive: true, capture: true }
   const activityEvents = ['pointerdown', 'keydown', 'touchstart', 'wheel', 'scroll'] as const
   document.addEventListener('visibilitychange', onVisibilityChange)
-  window.addEventListener('pageshow', onVisibilityChange)
+  window.addEventListener('pageshow', onPageShow)
   window.addEventListener('focus', tick)
   for (const ev of activityEvents) window.addEventListener(ev, onActivity, opts)
   window.addEventListener('pointermove', onPointerMove, opts)
@@ -142,7 +160,7 @@ function install(): () => void {
 
   return () => {
     document.removeEventListener('visibilitychange', onVisibilityChange)
-    window.removeEventListener('pageshow', onVisibilityChange)
+    window.removeEventListener('pageshow', onPageShow)
     window.removeEventListener('focus', tick)
     for (const ev of activityEvents) window.removeEventListener(ev, onActivity, opts)
     window.removeEventListener('pointermove', onPointerMove, opts)

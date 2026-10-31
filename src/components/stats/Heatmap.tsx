@@ -1,6 +1,7 @@
 import { useEffect, useId, useMemo, useState, type KeyboardEvent } from 'react'
 import { formatDuration, pluralRu } from '../../lib/format'
 import { ChartTooltip } from './ChartTooltip'
+import { HEAT_LEVELS } from './heatLevels'
 
 const MONTHS = ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек']
 const MONTHS_GEN = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря']
@@ -12,14 +13,6 @@ const STEP = CELL + GAP
 const LEFT = 26
 const TOP = 18
 
-/** Sequential safelight → ember ramp (one hue family, dark → bright). */
-export const HEAT_LEVELS = [
-  'var(--surface-2)',
-  'color-mix(in srgb, var(--safelight) 34%, var(--surface-2))',
-  'color-mix(in srgb, var(--safelight) 66%, var(--surface-2))',
-  'var(--safelight)',
-  'var(--data-1)',
-]
 const THRESH_MIN = [1, 20, 45, 90] // minutes → level 1..4
 
 function level(ms: number): number {

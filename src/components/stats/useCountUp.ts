@@ -5,14 +5,11 @@ import { useEffect, useRef, useState } from 'react'
 export function useCountUp<T extends Element>(value: number, duration = 1400) {
   const ref = useRef<T>(null)
   const reduced = useReducedMotion()
-  const [v, setV] = useState(reduced ? value : 0)
+  const [v, setV] = useState(0)
   const started = useRef(false)
 
   useEffect(() => {
-    if (reduced) {
-      setV(value)
-      return
-    }
+    if (reduced) return
     const el = ref.current
     let raf = 0
     const run = () => {
@@ -28,7 +25,7 @@ export function useCountUp<T extends Element>(value: number, duration = 1400) {
       raf = requestAnimationFrame(tick)
     }
     if (started.current || !el || typeof IntersectionObserver === 'undefined') {
-      if (started.current) setV(value)
+      if (started.current) raf = requestAnimationFrame(() => setV(value))
       else run()
       return () => cancelAnimationFrame(raf)
     }
@@ -45,5 +42,5 @@ export function useCountUp<T extends Element>(value: number, duration = 1400) {
     }
   }, [value, duration, reduced])
 
-  return [ref, v] as const
+  return [ref, reduced ? value : v] as const
 }

@@ -101,7 +101,7 @@ export function Setup() {
         }
 
   return (
-    <div className="mx-auto w-full max-w-[1180px] pt-6 md:pt-4">
+    <div className="mx-auto w-full max-w-[1180px] overflow-x-clip pt-6 lg:overflow-x-visible md:pt-4">
       <motion.header {...fade(0)} className="relative mb-10 flex items-start justify-between gap-6 md:mb-14">
         <div className="max-w-[640px]">
           <p className="text-overline uppercase text-text-3">

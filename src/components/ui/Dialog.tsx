@@ -70,7 +70,7 @@ export function Dialog({ open, onClose, title, description, children, footer, wi
   return createPortal(
     <AnimatePresence>
       {open && (
-        <div className="fixed inset-0 z-[95] flex items-end justify-center sm:items-center sm:p-6">
+        <div data-no-peek className="fixed inset-0 z-[95] flex items-end justify-center sm:items-center sm:p-6">
           <motion.div
             aria-hidden
             className="absolute inset-0 bg-[var(--overlay)] backdrop-blur-[var(--blur-lg)]"

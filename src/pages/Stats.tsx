@@ -1,11 +1,12 @@
 import { MotionConfig, motion } from 'framer-motion'
-import { useMemo, type ReactNode } from 'react'
+import { useMemo, useState, type ReactNode } from 'react'
 import { CircleMark, Swatch } from '../components/album/AlbumFilters'
 import { DemoBanner, EmptyInvite } from '../components/album/EmptyState'
 import { getFilm } from '../components/album/films'
 import { useAlbumFrames } from '../components/album/useAlbumFrames'
 import { FilmBars } from '../components/stats/FilmBars'
-import { HEAT_LEVELS, Heatmap } from '../components/stats/Heatmap'
+import { Heatmap } from '../components/stats/Heatmap'
+import { HEAT_LEVELS } from '../components/stats/heatLevels'
 import { HourClock } from '../components/stats/HourClock'
 import { poeticSummary } from '../components/stats/summary'
 import { useCountUp } from '../components/stats/useCountUp'
@@ -83,6 +84,7 @@ export default function Stats() {
   const { frames, demo } = useAlbumFrames()
   const stats = useMemo(() => computeStats(frames), [frames])
   const sentence = useMemo(() => poeticSummary(frames), [frames])
+  const [now] = useState(() => Date.now())
 
   const loadDemo = () => {
     useStudio.setState({ frames: getDemoFrames().map((f) => ({ ...f })) })
@@ -118,7 +120,7 @@ export default function Stats() {
 
   // last 14 days for streak dots
   const last14 = Array.from({ length: 14 }, (_, i) => {
-    const d = new Date()
+    const d = new Date(now)
     d.setHours(12, 0, 0, 0)
     d.setDate(d.getDate() - (13 - i))
     return (stats.byDay[dayKey(d.getTime())] ?? 0) > 0

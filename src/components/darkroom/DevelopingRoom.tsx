@@ -66,6 +66,7 @@ export function DevelopingRoom({ onRequestAbort, frameNumber }: { onRequestAbort
           {session.peeks > 0 && <LeakMarkers count={session.peeks} tone="red" />}
           <button
             type="button"
+            data-no-peek
             onClick={onRequestAbort}
             className="h-9 rounded-full border border-[rgba(255,110,95,.25)] px-3.5 text-body-sm transition-colors hover:border-[rgba(255,110,95,.5)] hover:bg-[rgba(255,80,60,.08)]"
             style={{ color: SAFE_INK }}

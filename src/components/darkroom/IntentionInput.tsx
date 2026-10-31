@@ -1,7 +1,7 @@
 import { useEffect, useId, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 
-export const IDEAS = [
+const IDEAS = [
   'Прогулка до реки',
   'Читать бумажную книгу',
   'Ужин без телефона',

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { formatTime, pluralRu } from '../../lib/format'
 
-export const PRESETS = [10, 25, 45, 90] as const
+const PRESETS = [10, 25, 45, 90] as const
 const MIN = 5
 const MAX = 180
 

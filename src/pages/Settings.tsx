@@ -255,7 +255,7 @@ export default function SettingsPage() {
           <SettingRow
             icon={<Hourglass className="size-5" />}
             title="Время на возврат"
-            hint="Сколько секунд дверь остаётся открытой, прежде чем свет начнёт засвечивать бумагу."
+            hint="Сколько секунд дверь может быть открыта без последствий. Вернулись к делам быстрее — засвета не будет; дольше — на кадре останется след."
             control={
               <span className="font-mono text-mono-sm text-text-1 tabular">
                 {settings.graceSeconds}&nbsp;с
