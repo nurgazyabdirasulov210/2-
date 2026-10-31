@@ -9,7 +9,7 @@ const base =
   'active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none cursor-pointer'
 
 const variants: Record<Variant, string> = {
-  primary: 'bg-text-1 text-bg hover:bg-white shadow-md',
+  primary: 'bg-text-1 text-bg hover:bg-text-1/88 shadow-md',
   ghost: 'border border-border-strong text-text-1 hover:bg-surface-2 hover:border-text-3',
   quiet: 'text-text-2 hover:text-text-1 hover:bg-surface-2',
   safelight:
