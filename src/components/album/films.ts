@@ -15,7 +15,7 @@ const FALLBACK: Record<FilmId, Film> = {
 
 export function getFilm(id: FilmId): Film {
   const f = (FILMS as Partial<Record<FilmId, Film>>)?.[id]
-  return f && f.name ? f : FALLBACK[id]
+  return f && f.name && f.id === id ? f : FALLBACK[id]
 }
 
 export function frameParams(f: Frame): FrameParams {

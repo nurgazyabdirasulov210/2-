@@ -139,6 +139,7 @@
 
 /* Darkroom full-screen views keep focus ring visible on near-black */
 .dr-room :focus-visible { outline-color: #ff8a7a; }
+.dr-door :focus-visible { outline-color: #ffe2c2; }
 
 @media (prefers-reduced-motion: reduce) {
   .dr-breathe, .dr-agitate, .dr-sway, .dr-spill, .dr-sheen, .dr-ripple, .dr-drip, .dr-dust { animation: none !important; }

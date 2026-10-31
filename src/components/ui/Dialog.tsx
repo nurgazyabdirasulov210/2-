@@ -26,7 +26,9 @@ export function Dialog({ open, onClose, title, description, children, footer, wi
   const descId = useId()
   const panel = useRef<HTMLDivElement>(null)
   const onCloseRef = useRef(onClose)
-  onCloseRef.current = onClose
+  useEffect(() => {
+    onCloseRef.current = onClose
+  })
 
   useEffect(() => {
     if (!open) return
@@ -155,7 +157,7 @@ export function ConfirmDialog({
           <Button
             variant="primary"
             onClick={onConfirm}
-            className={tone === 'danger' ? '!bg-danger !text-white hover:!brightness-110' : ''}
+            className={tone === 'danger' ? '!bg-danger !text-on-accent hover:!brightness-110' : ''}
           >
             {confirmLabel}
           </Button>

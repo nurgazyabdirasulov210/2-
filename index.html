@@ -3,15 +3,32 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/icon-192.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#0B0D14" />
     <meta name="description" content="Проявка — отложи экран, и смотри, что проявится. Офлайн-время превращается в уникальные фотографии." />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Проявка" />
     <title>Проявка — тёмная комната для офлайн-времени</title>
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="ru_RU" />
+    <meta property="og:site_name" content="Проявка" />
+    <meta property="og:title" content="Проявка — отложи экран и смотри, что проявится" />
+    <meta property="og:description" content="Пока вас нет у экрана, на фотобумаге проявляется уникальный кадр. Без AI, без аккаунта — всё хранится в вашем браузере." />
+    <meta property="og:image" content="/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Проявка — отложи экран и смотри, что проявится" />
+    <meta name="twitter:description" content="Пока вас нет у экрана, на фотобумаге проявляется уникальный кадр. Без AI, без аккаунта." />
+    <meta name="twitter:image" content="/og.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Onest:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
     <script>
-      try { const t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t } catch {}
+      try { const t = localStorage.getItem('theme'); if (t) { document.documentElement.dataset.theme = t; if (t === 'light') document.querySelector('meta[name=theme-color]').setAttribute('content', '#F6F3EE') } } catch {}
     </script>
   </head>
   <body>

@@ -81,12 +81,12 @@ export function FilmPicker({ value, onChange }: { value: FilmId; onChange: (id: 
   }
 
   return (
-    <div role="radiogroup" aria-label="Плёнка" className="grid grid-cols-1 gap-2.5 min-[420px]:grid-cols-2 lg:grid-cols-3">
+    <div role="radiogroup" aria-label="Плёнка" className="grid grid-cols-2 gap-2.5 lg:grid-cols-3">
       {films.map((film, i) => {
         const active = film.id === value
         return (
           <motion.button
-            key={film.id}
+            key={`${film.id}-${i}`}
             ref={(el) => {
               refs.current[i] = el
             }}
@@ -98,7 +98,7 @@ export function FilmPicker({ value, onChange }: { value: FilmId; onChange: (id: 
             onKeyDown={(e) => onKey(e, i)}
             whileTap={reduce ? undefined : { scale: 0.97 }}
             className={
-              'group relative flex items-center gap-3 overflow-hidden rounded-lg border p-3 pr-4 text-left ' +
+              'group relative flex flex-col items-start gap-2 overflow-hidden rounded-lg border p-3 text-left sm:flex-row sm:items-center sm:gap-3 sm:pr-4 ' +
               'transition-[border-color,background-color,box-shadow] duration-300 ease-out-quint ' +
               (active
                 ? 'border-accent/60 bg-surface-2 shadow-[0_0_0_1px_color-mix(in_oklch,var(--accent)_35%,transparent),0_14px_40px_-14px_color-mix(in_oklch,var(--accent)_55%,transparent)]'
@@ -116,9 +116,9 @@ export function FilmPicker({ value, onChange }: { value: FilmId; onChange: (id: 
               />
             )}
             <FilmCanister film={film} active={active} size="sm" />
-            <span className="relative min-w-0 flex-1">
+            <span className="relative w-full min-w-0 flex-1">
               <span className="flex items-center gap-2">
-                <span className="truncate font-display text-[1.3rem] font-medium leading-tight text-text-1">{film.name}</span>
+                <span className="truncate font-display text-[1.2rem] font-medium leading-tight text-text-1 sm:text-[1.3rem]">{film.name}</span>
                 {active && <Check className="h-3.5 w-3.5 shrink-0 text-accent" aria-hidden />}
               </span>
               <span className="mt-0.5 block text-caption text-text-2 line-clamp-2">{film.description}</span>

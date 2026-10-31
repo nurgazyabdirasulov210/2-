@@ -13,7 +13,8 @@ function mulberry(seed: number) {
 }
 
 /** Hand-drawn wobbly loop, deterministic per seed, in a 0..100 box. Ends overshoot the start like a real pencil stroke. */
-function loopPath(seed: number): string {
+function loopPath(seed: number, aspect: number): string {
+  const H = 100 * aspect
   const r = mulberry(seed || 1)
   const start = -Math.PI * (0.55 + r() * 0.3)
   const span = Math.PI * 2 + 0.35 + r() * 0.35
@@ -28,9 +29,9 @@ function loopPath(seed: number): string {
     const wob = 1 + 0.028 * Math.sin(3 * a + p1) + 0.018 * Math.sin(5 * a + p2)
     const drift = 1 - 0.055 * t // spirals slightly inward so the overlap is visible
     const rx = 48 * wob * drift
-    const ry = 47 * wob * drift
+    const ry = (H / 2 - 1.5) * wob * drift
     const x = 50 + rx * Math.cos(a) * Math.cos(tilt) - ry * Math.sin(a) * Math.sin(tilt)
-    const y = 50 + rx * Math.cos(a) * Math.sin(tilt) + ry * Math.sin(a) * Math.cos(tilt)
+    const y = H / 2 + rx * Math.cos(a) * Math.sin(tilt) + ry * Math.sin(a) * Math.cos(tilt)
     pts.push(`${i === 0 ? 'M' : 'L'}${x.toFixed(2)} ${y.toFixed(2)}`)
   }
   return pts.join(' ')
@@ -44,24 +45,27 @@ export function GreaseCircle({
   seed,
   show,
   bleed = '-9%',
-  width = 3.2,
+  width = 2.4,
   animate = true,
+  aspect = 1.25,
 }: {
   seed: number
   show: boolean
   bleed?: string
   width?: number
   animate?: boolean
+  /** height / width of the circled box (frames are 4:5) */
+  aspect?: number
 }) {
   const id = useId().replace(/:/g, '')
   const reduced = useReducedMotion()
-  const d = useMemo(() => loopPath(seed), [seed])
+  const d = useMemo(() => loopPath(seed, aspect), [seed, aspect])
   if (!show) return null
   const instant = reduced || !animate
   return (
     <svg
       aria-hidden
-      viewBox="0 0 100 100"
+      viewBox={`0 0 100 ${100 * aspect}`}
       preserveAspectRatio="none"
       className="pointer-events-none absolute z-10 overflow-visible"
       style={{ inset: bleed, width: `calc(100% - 2 * ${bleed})`, height: `calc(100% - 2 * ${bleed})` }}
@@ -80,7 +84,6 @@ export function GreaseCircle({
           strokeWidth={width}
           strokeLinecap="round"
           strokeLinejoin="round"
-          vectorEffect="non-scaling-stroke"
           initial={instant ? false : { pathLength: 0, opacity: 0.4 }}
           animate={{ pathLength: 1, opacity: 0.92 }}
           transition={{ duration: 0.55, ease: [0.65, 0, 0.35, 1] }}
@@ -91,7 +94,6 @@ export function GreaseCircle({
           stroke="#FF6A55"
           strokeWidth={width * 0.35}
           strokeLinecap="round"
-          vectorEffect="non-scaling-stroke"
           transform="translate(0.6 -0.5)"
           initial={instant ? false : { pathLength: 0 }}
           animate={{ pathLength: 1, opacity: 0.45 }}

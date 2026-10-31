@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, NavLink, useLocation, useOutlet } from 'react-router-dom'
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from 'framer-motion'
 import { Aperture, BookOpen, LayoutGrid, Settings2, type LucideIcon } from 'lucide-react'
@@ -12,7 +12,7 @@ interface NavItem {
   icon: LucideIcon
 }
 
-export const NAV: NavItem[] = [
+const NAV: NavItem[] = [
   { to: '/darkroom', label: 'Тёмная комната', short: 'Комната', icon: Aperture },
   { to: '/album', label: 'Контактный лист', short: 'Лист', icon: LayoutGrid },
   { to: '/stats', label: 'Журнал', short: 'Журнал', icon: BookOpen },
@@ -22,9 +22,8 @@ export const NAV: NavItem[] = [
 /** Keeps the outlet element of the route that is exiting, so AnimatePresence can animate it out. */
 function FrozenOutlet() {
   const outlet = useOutlet()
-  const ref = useRef(outlet)
-  ref.current ??= outlet
-  return ref.current
+  const [frozen] = useState(outlet)
+  return frozen
 }
 
 function PillNav({ hidden }: { hidden: boolean }) {
@@ -100,7 +99,7 @@ export default function AppShell() {
         animate={{ opacity: immersive ? 0 : 1 }}
         transition={{ duration: 0.4 }}
         inert={immersive || undefined}
-        className="pointer-events-none fixed inset-x-0 top-0 z-40 flex h-16 items-center px-4 md:h-[72px] md:px-8"
+        className="pointer-events-none fixed inset-x-0 top-0 z-40 flex h-16 items-center bg-gradient-to-b from-bg via-bg/75 to-transparent px-4 md:h-[72px] md:px-8"
       >
         <Link
           to="/"
