@@ -49,11 +49,11 @@ export function DeveloperTray({
                 progress={progress}
                 maxDpr={1.5}
                 label="Кадр в проявителе"
-                className={safelight ? '[filter:grayscale(1)_contrast(1.15)_brightness(1.12)]' : ''}
+                className={safelight ? '[filter:grayscale(1)_contrast(1.15)_brightness(1.04)]' : ''}
               />
               {/* safelight tint: everything turns red/black */}
               {safelight && (
-                <div className="pointer-events-none absolute inset-0 bg-[#e0453a] mix-blend-multiply" style={{ opacity: 0.92 }} />
+                <div className="pointer-events-none absolute inset-0 bg-[#b8342b] mix-blend-multiply" style={{ opacity: 0.95 }} />
               )}
               {/* light falling on the paper */}
               <div

@@ -1,6 +1,6 @@
 // Shared post-processing: bloom/halation, weather overlays, light leaks, film grade + grain.
 import type { FrameParams } from '../types'
-import { blurSurface, createSurface, type Surface } from './canvas'
+import { blurSurface, type Surface } from './canvas'
 import type { Env } from './env'
 import { hash2, Rng } from './rng'
 import type { BloomPass, Grade } from './types'
@@ -169,9 +169,9 @@ export function drawLeaks(main: Surface, params: FrameParams, rng: Rng): void {
     for (let i = 0; i < 3; i++) drawLeak(ctx, r.fork(i), H, 1)
     ctx.globalCompositeOperation = 'source-over'
     const g = ctx.createRadialGradient(r.range(0.2, 0.8), r.range(0.2, 0.8) * H, 0.05, 0.5, H / 2, H)
-    g.addColorStop(0, css([255, 244, 226], 0.78))
-    g.addColorStop(0.6, css([252, 226, 196], 0.6))
-    g.addColorStop(1, css([245, 200, 170], 0.5))
+    g.addColorStop(0, css([255, 244, 226], 0.7))
+    g.addColorStop(0.6, css([252, 226, 196], 0.52))
+    g.addColorStop(1, css([245, 200, 170], 0.42))
     ctx.fillStyle = g
     ctx.fillRect(0, 0, 1, H)
   }

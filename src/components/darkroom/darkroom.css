@@ -60,9 +60,9 @@
   inset: -40%;
   background: linear-gradient(100deg,
     transparent 38%,
-    rgba(255, 180, 160, .10) 46%,
-    rgba(255, 210, 190, .16) 50%,
-    rgba(255, 180, 160, .08) 54%,
+    rgba(255, 180, 160, .06) 46%,
+    rgba(255, 210, 190, .10) 50%,
+    rgba(255, 180, 160, .05) 54%,
     transparent 62%);
   animation: dr-sheen 11s ease-in-out infinite alternate;
   pointer-events: none;

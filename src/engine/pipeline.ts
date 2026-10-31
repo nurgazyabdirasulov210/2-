@@ -57,6 +57,7 @@ export function buildFrame(params: FrameParams, w: number, h: number): BuiltFram
   drawLeaks(main, params, new Rng(mixSeed(params.seed >>> 0, 0x1ea4)))
   const dn = createNoise2D(mixSeed(seed, 991))
   const dev = gradePass(main, grade, seed, (u, v) => fbm(dn, u * 3.2, v * 3.2, 3))
+  normalizeDev(dev)
   return {
     ...dev,
     film: impl.meta.id,
@@ -66,6 +67,23 @@ export function buildFrame(params: FrameParams, w: number, h: number): BuiltFram
     sheenSeed: seed,
     out: null,
   }
+}
+
+/** Stretch the development order to the frame's own tonal range (2%..98%). */
+function normalizeDev(d: Developed): void {
+  const hist = new Uint32Array(256)
+  const n = d.dev.length
+  for (let i = 0; i < n; i++) hist[d.dev[i]]++
+  let acc = 0
+  let lo = 0
+  let hi = 255
+  for (let i = 0; i < 256; i++) { acc += hist[i]; if (acc >= n * 0.02) { lo = i; break } }
+  acc = 0
+  for (let i = 255; i >= 0; i--) { acc += hist[i]; if (acc >= n * 0.02) { hi = i; break } }
+  if (hi - lo < 16) return
+  const map = new Uint8Array(256)
+  for (let i = 0; i < 256; i++) map[i] = clamp((i - lo) / (hi - lo)) * 255
+  for (let i = 0; i < n; i++) d.dev[i] = map[d.dev[i]]
 }
 
 // --- cache ---------------------------------------------------------------
@@ -105,10 +123,10 @@ export function developInto(f: BuiltFrame, progress: number, out: Uint8ClampedAr
     out.set(f.data)
     return
   }
-  // darks start early, highlights late; each tone takes ~0.42 of the bath to reach full density
+  // darks start early, highlights late; each tone takes ~0.5 of the bath to reach full density
   for (let i = 0; i < 256; i++) {
-    const start = 0.02 + 0.55 * Math.pow(i / 255, 1.1)
-    alphaLut[i] = smoothstep(start, start + 0.42, p)
+    const start = 0.02 + 0.42 * Math.pow(i / 255, 1.2)
+    alphaLut[i] = smoothstep(start, start + 0.5, p)
   }
   const colorT = smoothstep(0.3, 0.98, p)
   const mono = f.devMono * (1 - colorT)

@@ -16,7 +16,7 @@ interface Cam { vx: number; hy: number; f: number; camH: number; camX: number }
 
 function draw(s: Scene): void {
   const { ctx, glow, rng, noise, env, H, pw } = s
-  const cam: Cam = { vx: rng.range(0.4, 0.6), hy: H * rng.range(0.44, 0.54), f: rng.range(0.55, 0.75), camH: 1.6, camX: rng.range(-1.8, 1.8) }
+  const cam: Cam = { vx: rng.range(0.4, 0.6), hy: H * rng.range(0.5, 0.6), f: rng.range(0.55, 0.75), camH: 1.6, camX: rng.range(-1.8, 1.8) }
   const P = (X: number, Y: number, Z: number): [number, number] => [cam.vx + (cam.f * (X - cam.camX)) / Z, cam.hy - (cam.f * (Y - cam.camH)) / Z]
   const ROAD = rng.range(4.2, 6)
   const FAC = ROAD + rng.range(2.2, 3.4)
@@ -86,6 +86,15 @@ function draw(s: Scene): void {
     quad(ctx, P(side * ROAD, 0, 1.2), P(side * ROAD, 0.15, 1.2), P(side * ROAD, 0.15, ZF), P(side * ROAD, 0, ZF))
     ctx.fillStyle = css([50, 46, 52])
     ctx.fill()
+  }
+  // sky glow mirrored on the wet asphalt
+  {
+    const g = ctx.createLinearGradient(0, cam.hy, 0, H)
+    g.addColorStop(0, css([110, 70, 80], 0.35 + env.rain * 0.2))
+    g.addColorStop(0.4, css([40, 40, 70], 0.12))
+    g.addColorStop(1, css([20, 20, 40], 0.05))
+    ctx.fillStyle = g
+    ctx.fillRect(0, cam.hy, 1, H - cam.hy)
   }
   // lane dashes
   for (let z = 4; z < 120; z += 9) {
@@ -373,7 +382,7 @@ export const cinestill: FilmImpl = {
     }),
   bloom: () => [
     { radius: 0.006, strength: 0.6, tint: [255, 230, 210] },
-    { radius: 0.02, strength: 1.5, tint: [255, 50, 26], mono: true },
+    { radius: 0.018, strength: 1.9, tint: [255, 50, 26], mono: true },
     { radius: 0.07, strength: 0.8, tint: [255, 70, 40], mono: true },
   ],
   precipTone: [255, 220, 200],

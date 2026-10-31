@@ -39,11 +39,13 @@ export default function Darkroom() {
   useDarkroomWatcher()
   const reduce = useReducedMotion()
   const phase = useStudio((s) => s.phase)
-  const hasSession = useStudio((s) => s.session != null)
+  const sessionId = useStudio((s) => s.session?.id ?? null)
+  const hasSession = sessionId != null
   const abortSession = useStudio((s) => s.abortSession)
   const frames = useStudio((s) => s.frames)
   const lastId = useStudio((s) => s.lastFinishedFrameId)
-  const [confirmAbort, setConfirmAbort] = useState(false)
+  // the confirm is bound to the session it was asked for, so it can't leak into the next one
+  const [confirmFor, setConfirmFor] = useState<string | null>(null)
 
   useDarkroomSound(phase)
 
@@ -60,11 +62,6 @@ export default function Darkroom() {
           ? 'reveal'
           : 'setup'
 
-  // Close a dangling confirm when the session ends by itself.
-  useEffect(() => {
-    if (!hasSession) setConfirmAbort(false)
-  }, [hasSession])
-
   // Lock page scroll while the room is dark.
   useEffect(() => {
     if (view !== 'developing' && view !== 'door') return
@@ -76,13 +73,13 @@ export default function Darkroom() {
   }, [view])
 
   const take = () => {
-    setConfirmAbort(false)
+    setConfirmFor(null)
     abortSession()
   }
 
   const room =
     view === 'developing' ? (
-      <DevelopingRoom key="developing" frameNumber={nextNumber} onRequestAbort={() => setConfirmAbort(true)} />
+      <DevelopingRoom key="developing" frameNumber={nextNumber} onRequestAbort={() => setConfirmFor(sessionId)} />
     ) : view === 'door' ? (
       <DoorOpen key="door" onTakeAsIs={take} />
     ) : null
@@ -107,14 +104,14 @@ export default function Darkroom() {
       {typeof document !== 'undefined' && createPortal(<AnimatePresence>{room}</AnimatePresence>, document.body)}
 
       <ConfirmDialog
-        open={confirmAbort && hasSession}
+        open={confirmFor != null && confirmFor === sessionId}
         title="Прервать проявку?"
         description="Кадр сохранится как есть — засвеченным. Его всё равно можно будет найти в контактном листе."
         confirmLabel="Забрать как есть"
         cancelLabel="Продолжить проявку"
         tone="danger"
         onConfirm={take}
-        onCancel={() => setConfirmAbort(false)}
+        onCancel={() => setConfirmFor(null)}
       />
     </>
   )

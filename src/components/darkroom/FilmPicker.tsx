@@ -118,7 +118,7 @@ export function FilmPicker({ value, onChange }: { value: FilmId; onChange: (id: 
             <FilmCanister film={film} active={active} size="sm" />
             <span className="relative w-full min-w-0 flex-1">
               <span className="flex items-center gap-2">
-                <span className="truncate font-display text-[1.2rem] font-medium leading-tight text-text-1 sm:text-[1.3rem]">{film.name}</span>
+                <span className="font-display text-[1.2rem] font-medium leading-tight text-text-1 sm:text-[1.3rem]">{film.name}</span>
                 {active && <Check className="h-3.5 w-3.5 shrink-0 text-accent" aria-hidden />}
               </span>
               <span className="mt-0.5 block text-caption text-text-2 line-clamp-2">{film.description}</span>

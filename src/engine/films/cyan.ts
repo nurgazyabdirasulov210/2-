@@ -123,7 +123,7 @@ function grass(ctx: Ctx, rng: Rng, x: number, y: number, ang: number, len: numbe
   const n = rng.int(10, 22)
   for (let i = 0; i < n; i++) {
     const t = 0.6 + (i / n) * 0.4
-    const px = (1 - t) * (1 - t) * 0 + 2 * (1 - t) * t * cx + t * t * len
+    const px = 2 * (1 - t) * t * cx + t * t * len
     const py = 2 * (1 - t) * t * cy + t * t * bend * len * 0.35
     const s = i % 2 ? 1 : -1
     ctx.fillStyle = css(W, op * 0.9)
@@ -353,7 +353,7 @@ function draw(s: Scene): void {
     // ferns hero
     const n = rng.int(1, 3)
     for (let i = 0; i < n; i++) {
-      const bx = cx + rng.range(-0.25, 0.25)
+      const bx = cx + rng.range(-0.15, 0.15) + (i - (n - 1) / 2) * 0.22
       fern(p, rng, bx, H * rng.range(0.85, 1.0), -Math.PI / 2 + rng.range(-0.45, 0.45), H * rng.range(0.55, 0.78) / (1 + i * 0.25), 0.95)
     }
     for (let i = 0; i < rng.int(2, 5); i++) grass(p, rng, rng.range(0.1, 0.9), H * 0.98, -Math.PI / 2 + rng.range(-0.5, 0.5), H * rng.range(0.35, 0.65), 0.9)
